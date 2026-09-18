@@ -86,7 +86,13 @@ object AppLogger {
 
     fun e(msg: String, throwable: Throwable? = null) = write('E', LOGCAT_TAG, msg, throwable)
 
+    fun d(tag: String, msg: String) = write('D', tag, msg, null)
+
     fun i(tag: String, msg: String) = write('I', tag, msg, null)
+
+    fun w(tag: String, msg: String) = write('W', tag, msg, null)
+
+    fun w(tag: String, msg: String, throwable: Throwable?) = write('W', tag, msg, throwable)
 
     fun e(tag: String, msg: String, throwable: Throwable? = null) = write('E', tag, msg, throwable)
 
