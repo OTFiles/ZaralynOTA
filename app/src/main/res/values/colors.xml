@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 调色板（静态，兼容 Android 12 以下设备） -->
+    <color name="md_primary">#1B6C3A</color>
+    <color name="md_on_primary">#FFFFFF</color>
+    <color name="md_primary_container">#A6F5B8</color>
+    <color name="md_on_primary_container">#00210D</color>
+
+    <color name="md_secondary">#4F6354</color>
+    <color name="md_on_secondary">#FFFFFF</color>
+    <color name="md_secondary_container">#D1E8D4</color>
+    <color name="md_on_secondary_container">#0C1F13</color>
+
+    <color name="md_tertiary">#3A6475</color>
+    <color name="md_on_tertiary">#FFFFFF</color>
+    <color name="md_tertiary_container">#BEEAFE</color>
+    <color name="md_on_tertiary_container">#001F2A</color>
+
+    <color name="md_error">#BA1A1A</color>
+    <color name="md_on_error">#FFFFFF</color>
+    <color name="md_error_container">#FFDAD6</color>
+    <color name="md_on_error_container">#410002</color>
+
+    <color name="md_background">#F6FBF3</color>
+    <color name="md_on_background">#181D18</color>
+    <color name="md_surface">#F6FBF3</color>
+    <color name="md_on_surface">#181D18</color>
+    <color name="md_surface_variant">#DDE5DB</color>
+    <color name="md_on_surface_variant">#414942</color>
+    <color name="md_outline">#717971</color>
+    <color name="md_outline_variant">#C1C9BF</color>
+
+    <color name="md_surface_container">#EAF0E7</color>
+    <color name="md_surface_container_high">#E4EAE2</color>
+</resources>

@@ -1,0 +1,146 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
+      with:
+        gradle-version: 8.3
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+    - name: Build Debug APK
+      id: build
+      run: |
+        set -o pipefail
+        gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee build-output.log
+        exit ${PIPESTATUS[0]}
+
+    - name: Upload Build Log On Failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log
+        path: build-output.log
+        if-no-files-found: ignore
+
+    - name: Upload Debug APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: ignore
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
+      with:
+        gradle-version: 8.3
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+    - name: Decode keystore
+      run: |
+        echo "${{ secrets.OTF_JKS_BASE64 }}" | base64 -d > otf.jks
+
+    - name: Build Release APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: gradle assembleRelease --no-daemon --stacktrace
+
+    - name: Rename APK
+      run: |
+        mv app/build/outputs/apk/release/app-release.apk ZaralynOTA-v${{ github.run_number }}.apk
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Zaralyn OTA v${{ github.run_number }}
+        body: |
+          ## Zaralyn OTA 固件下载器
+
+          按当前机型向读书郎 OTA 服务器查询固件包地址，并支持直接下载。
+
+          ### 功能
+
+          - **查询固件地址**：POST `ota.readboy.com/update.php`，支持 JSON / XML 两种响应形态
+          - **完整包模式**：发送无法匹配的指纹，强制服务端回退完整包通道
+          - **通道选择**：正式 / 测试 / 公测
+          - **直接下载**：流式下载 + 实时进度/速度 + MD5 校验
+          - **日志系统**：Logcat / 内存 / 按天滚动文件三路输出，崩溃自动落盘
+          - **错误处理**：网络、解析、下载全链路捕获并可在界面查看堆栈
+
+          ### 安装说明
+
+          1. 下载 APK 并安装
+          2. 授予联网权限（首次启动即可）
+          3. 选择通道 → 「查询更新」→ 「下载固件」
+
+          ### 说明
+
+          - 逆向参考：DreamUpdate (com.dream.ota.update) / 家长管理生态接口文档
+          - 固件保存于应用私有目录 `Android/data/com.zaralyn.ota/files/Download/`
+          - 仅供设备所有者对自己的设备做固件存档使用
+        files: ZaralynOTA-v${{ github.run_number }}.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

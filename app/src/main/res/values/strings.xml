@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zaralyn OTA</string>
+    <string name="log_title">运行日志</string>
+
+    <string name="section_device">当前设备信息</string>
+    <string name="section_query">查询设置</string>
+    <string name="section_result">升级包信息</string>
+    <string name="section_download">下载</string>
+
+    <string name="channel_label">更新通道</string>
+    <string name="channel_release">正式</string>
+    <string name="channel_test">测试</string>
+    <string name="channel_beta">公测</string>
+
+    <string name="full_package_mode">完整包模式</string>
+    <string name="full_package_mode_desc">发送服务器无法匹配的指纹，强制走完整包通道（增量包要求基线指纹精确匹配）</string>
+    <string name="fingerprint_hint">自定义指纹（留空则发送 full_forge）</string>
+
+    <string name="btn_query">查询更新</string>
+    <string name="btn_download">下载固件</string>
+    <string name="btn_cancel">取消下载</string>
+    <string name="btn_copy_url">复制链接</string>
+    <string name="btn_open_url">浏览器打开</string>
+    <string name="btn_show_params">查看请求参数</string>
+    <string name="btn_expand_device">展开全部参数</string>
+
+    <string name="label_version">版本</string>
+    <string name="label_size">大小</string>
+    <string name="label_md5">MD5</string>
+    <string name="label_force">强制升级</string>
+    <string name="label_desc">更新说明</string>
+    <string name="label_url">下载地址</string>
+    <string name="label_source">来源</string>
+
+    <string name="menu_log">日志</string>
+    <string name="menu_about">关于</string>
+    <string name="menu_refresh">刷新</string>
+    <string name="menu_copy">复制</string>
+    <string name="menu_clear">清空</string>
+    <string name="menu_share">分享日志</string>
+
+    <string name="msg_querying">正在向服务器查询…</string>
+    <string name="msg_downloading">正在下载…</string>
+    <string name="msg_download_done">下载完成</string>
+    <string name="msg_download_cancel">下载已取消</string>
+    <string name="msg_copied">已复制到剪贴板</string>
+
+    <string name="about_title">关于</string>
+    <string name="about_message">Zaralyn OTA 固件下载器\n\n基于对 DreamUpdate(com.dream.ota.update) 的逆向结果实现：\n· 接口 POST http://ota.readboy.com/update.php（无鉴权）\n· 参数取自系统属性（model/board/chipset/fingerprint 等）\n· 响应支持 JSON data 直出与 XML 配置两种形态\n· 服务器按 fingerprint 决定下发增量或完整包\n\n仅供设备所有者对自己的设备做固件存档使用。\n\n日志目录：\n%1$s
+</string>
+</resources>
