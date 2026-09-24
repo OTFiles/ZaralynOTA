@@ -1,4 +1,4 @@
-package com.zaralyn.ota
+package com.readboy.otadownloader
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.zaralyn.ota.databinding.ActivityLogBinding
+import com.readboy.otadownloader.databinding.ActivityLogBinding
 
 /**
  * 日志查看界面：内存日志实时查看 + 文件日志分享/清空

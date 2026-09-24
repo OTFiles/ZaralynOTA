@@ -89,9 +89,9 @@ Content-Type: application/x-www-form-urlencoded
 
 ## 日志
 
-- 目录：`Android/data/com.zaralyn.ota/files/logs/`
+- 目录：`Android/data/com.readboy.otadownloader/files/logs/`
 - 文件：`ota-yyyyMMdd.log`，保留最近 10 个，单文件超 2MB 自动归档
-- 崩溃记录：`Android/data/com.zaralyn.ota/files/last_crash.txt`（下次启动自动加载进日志）
+- 崩溃记录：`Android/data/com.readboy.otadownloader/files/last_crash.txt`（下次启动自动加载进日志）
 - 界面右上角「日志」可查看/复制/分享/清空
 
 ## 免责声明

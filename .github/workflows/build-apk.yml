@@ -137,7 +137,7 @@ jobs:
           ### 说明
 
           - 逆向参考：DreamUpdate (com.dream.ota.update) / 家长管理生态接口文档
-          - 固件保存于应用私有目录 `Android/data/com.zaralyn.ota/files/Download/`
+          - 固件保存于应用私有目录 `Android/data/com.readboy.otadownloader/files/Download/`
           - 仅供设备所有者对自己的设备做固件存档使用
         files: ZaralynOTA-v${{ github.run_number }}.apk
         draft: false

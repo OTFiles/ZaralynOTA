@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.zaralyn.ota"
+    namespace = "com.readboy.otadownloader"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.zaralyn.ota"
+        applicationId = "com.readboy.otadownloader"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     signingConfigs {

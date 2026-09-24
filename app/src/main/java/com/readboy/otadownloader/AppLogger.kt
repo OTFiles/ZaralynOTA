@@ -1,4 +1,4 @@
-package com.zaralyn.ota
+package com.readboy.otadownloader
 
 import android.content.Context
 import android.os.Build

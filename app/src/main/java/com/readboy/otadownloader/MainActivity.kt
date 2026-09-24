@@ -1,4 +1,4 @@
-package com.zaralyn.ota
+package com.readboy.otadownloader
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -13,7 +13,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.zaralyn.ota.databinding.ActivityMainBinding
+import com.readboy.otadownloader.databinding.ActivityMainBinding
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
