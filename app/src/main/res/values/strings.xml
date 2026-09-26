@@ -49,4 +49,9 @@
     <string name="about_title">关于</string>
     <string name="about_message">Zaralyn OTA 固件下载器\n\n基于对 DreamUpdate(com.dream.ota.update) 的逆向结果实现：\n· 接口 POST http://ota.readboy.com/update.php（无鉴权）\n· 参数取自系统属性（model/board/chipset/fingerprint 等）\n· 响应支持 JSON data 直出与 XML 配置两种形态\n· 服务器按 fingerprint 决定下发增量或完整包\n\n仅供设备所有者对自己的设备做固件存档使用。\n\n日志目录：\n%1$s
 </string>
+
+    <string name="menu_advanced">高级参数</string>
+    <string name="auto_probe">自动参数探测</string>
+    <string name="auto_probe_desc">服务器按 model + board + android + chipset 匹配机型；开启后若默认参数不匹配，会自动尝试多种 chipset 取值。</string>
+    <string name="probe_progress">正在探测参数组合 %1$d：%2$s → %3$s</string>
 </resources>

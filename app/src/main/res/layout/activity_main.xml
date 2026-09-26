@@ -111,6 +111,20 @@
                     </RadioGroup>
 
                     <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/swAutoProbe"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:checked="true"
+                        android:text="@string/auto_probe" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/auto_probe_desc"
+                        android:textAppearance="?attr/textAppearanceBodySmall" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/swFullPackage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -175,6 +189,15 @@
                         android:layout_height="wrap_content"
                         android:text="@string/section_result"
                         android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+                    <TextView
+                        android:id="@+id/tvResultHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorPrimary"
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/tvResult"

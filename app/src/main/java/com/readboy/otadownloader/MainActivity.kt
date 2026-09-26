@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var deviceInfo: DeviceInfo? = null
     private var currentPackage: OtaPackage? = null
+    private var matchedLabel: String? = null
     private var downloadJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +53,11 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_log -> {
                     startActivity(Intent(this, LogActivity::class.java))
+                    true
+                }
+
+                R.id.action_advanced -> {
+                    showAdvancedParams()
                     true
                 }
 
@@ -151,11 +157,48 @@ class MainActivity : AppCompatActivity() {
             try {
                 val channel = currentChannel()
                 val override = fingerprintOverride()
-                AppLogger.i(TAG, "开始查询: 通道=$channel, 指纹=${override ?: "真实"}")
-                val pkg = OtaApi.query(this@MainActivity, channel, override)
+                val probeEnabled = binding.swAutoProbe.isChecked
+                AppLogger.i(TAG, "开始查询: 通道=$channel, 指纹=${override ?: "真实"}, 自动探测=$probeEnabled")
+
+                val pkg = if (probeEnabled) {
+                    // 探测过程中实时把每次尝试写进界面提示，避免长时间静默
+                    val outcome = OtaApi.queryWithProbe(
+                        context = this@MainActivity,
+                        channel = channel,
+                        fingerprintOverride = override,
+                        overrides = manualOverrides()
+                    ) { attempt ->
+                        runOnUiThread {
+                            binding.tvResultHint.visibility = View.VISIBLE
+                            binding.tvResultHint.text = getString(
+                                R.string.probe_progress,
+                                attempt.index,
+                                attempt.label,
+                                attempt.status
+                            )
+                        }
+                    }
+                    if (outcome.pkg == null) {
+                        val attempts = outcome.attempts.joinToString("\n") {
+                            "  ${it.index}. ${it.label} → ${it.status}"
+                        }
+                        throw OtaException(
+                            (outcome.errorMessage ?: "全部参数组合均未获取到升级包") +
+                                "\n\n已尝试 " + outcome.attempts.size + " 种参数组合：\n" + attempts +
+                                "\n\n可在「高级参数」里手动指定 chipset 后再试。"
+                        )
+                    }
+                    matchedLabel = outcome.matchedLabel
+                    outcome.pkg
+                } else {
+                    matchedLabel = null
+                    OtaApi.query(this@MainActivity, channel, override, manualOverrides())
+                }
+
                 currentPackage = pkg
                 showResult(pkg)
-                Snackbar.make(binding.root, "查询成功: 版本 ${pkg.version}", Snackbar.LENGTH_LONG).show()
+                val hit = matchedLabel?.let { "（命中：$it）" }.orEmpty()
+                Snackbar.make(binding.root, "查询成功: 版本 ${pkg.version}$hit", Snackbar.LENGTH_LONG).show()
             } catch (e: OtaException) {
                 AppLogger.e(TAG, "查询失败: ${e.message}", e)
                 showError("查询更新", e.message ?: "未知错误", e)
@@ -168,6 +211,70 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ==================== 高级参数（手动覆盖 / 持久化） ====================
+
+    private fun prefs() = getSharedPreferences("advanced", MODE_PRIVATE)
+
+    /** 手动覆盖项（仅非空生效） */
+    private fun manualOverrides(): Map<String, String> {
+        val keys = listOf("model", "chipset", "display", "hard", "serial", "board", "android")
+        return keys.mapNotNull { k ->
+            prefs().getString(k, null)?.takeIf { it.isNotBlank() }?.let { k to it }
+        }.toMap()
+    }
+
+    private fun showAdvancedParams() {
+        val info = deviceInfo ?: return
+        val keys = linkedMapOf(
+            "model" to info.model,
+            "board" to info.board,
+            "android" to info.android,
+            "chipset" to info.chipset,
+            "display" to info.display,
+            "hard" to info.hard,
+            "serial" to info.serial
+        )
+        val values = keys.map { (k, def) -> prefs().getString(k, null) ?: def }.toTypedArray()
+        val labels = keys.keys.toTypedArray()
+        val hints = labels.map { "$it（默认 ${if (keys.getValue(it).isBlank()) "空" else keys.getValue(it)}）" }.toTypedArray()
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("高级参数（留空 = 用默认值）")
+            .setMultiChoiceItems(hints, null, null)
+            .setPositiveButton("编辑") { _, _ -> editEachParam(labels, values, 0) }
+            .setNeutralButton("恢复默认") { _, _ ->
+                prefs().edit().clear().apply()
+                AppLogger.i(TAG, "已恢复默认参数")
+                toast("已恢复默认参数")
+            }
+            .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    private fun editEachParam(labels: Array<String>, values: Array<String>, index: Int) {
+        if (index >= labels.size) {
+            toast("参数已保存，重新查询生效")
+            AppLogger.i(TAG, "高级参数已保存: ${prefs().all}")
+            return
+        }
+        val key = labels[index]
+        val input = android.widget.EditText(this).apply {
+            setText(values[index])
+            setHint(key)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(key)
+            .setView(input)
+            .setPositiveButton("下一个") { _, _ ->
+                val text = input.text?.toString()?.trim().orEmpty()
+                prefs().edit().putString(key, text).apply()
+                values[index] = text
+                editEachParam(labels, values, index + 1)
+            }
+            .setNegativeButton("跳过") { _, _ -> editEachParam(labels, values, index + 1) }
+            .show()
+    }
+
     private fun showRequestParams() {
         val info = deviceInfo
         if (info == null) {
@@ -177,7 +284,8 @@ class MainActivity : AppCompatActivity() {
         runCatching {
             DeviceInfoCollector.buildParams(
                 this, info, currentChannel(),
-                fingerprintOverride() ?: info.fingerprint
+                fingerprintOverride() ?: info.fingerprint,
+                manualOverrides()
             )
         }.onSuccess { params ->
             val text = params.entries.joinToString("\n") { "${it.key} = ${it.value}" }
@@ -198,6 +306,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showResult(pkg: OtaPackage) {
         binding.cardResult.visibility = View.VISIBLE
+        binding.tvResultHint.visibility = if (matchedLabel != null) View.VISIBLE else View.GONE
+        if (matchedLabel != null) binding.tvResultHint.text = "参数组合命中：$matchedLabel"
         binding.tvResult.text = buildString {
             append(getString(R.string.label_version)).append(": ").append(pkg.version.ifBlank { "未知" }).append('\n')
             append("名称: ").append(pkg.name.ifBlank { "—" }).append('\n')
@@ -216,7 +326,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideResult() {
         currentPackage = null
+        matchedLabel = null
         binding.cardResult.visibility = View.GONE
+        binding.tvResultHint.visibility = View.GONE
     }
 
     private fun setQuerying(querying: Boolean) {

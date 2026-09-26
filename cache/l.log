@@ -1,0 +1,160 @@
+===== ota-20260924.log =====
+09-24 22:37:25.194 I/ZaralynOTA [main] ======== 应用启动 ========
+09-24 22:37:25.195 I/ZaralynOTA [main] 日志目录: /storage/emulated/0/Android/data/com.readboy.otadownloader/files/logs
+09-24 22:37:25.195 I/ZaralynOTA [main] 设备: READBOY Readboy_C18, Android 9 (SDK 28)
+09-24 22:37:25.195 I/ZaralynOTA [main] APK 版本: 1.1 (2)
+09-24 22:37:25.222 I/MainActivity [main] MainActivity onCreate
+09-24 22:37:25.350 I/DeviceInfo [main] 设备信息采集完成: Readboy_C18 / 292 / 9
+09-24 22:37:25.351 D/DeviceInfo [main] 完整参数:
+model = Readboy_C18
+brand = readboy
+name = msm8998
+device = msm8998
+board = msm8998
+chipset = 292
+hard = qcom
+android = 9
+firmware = unknown
+display = 202308161825
+time = 1692181261
+builder = lys
+serial = unknown
+mac = 
+fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+09-24 22:37:45.131 I/MainActivity [main] 开始查询: 通道=0, 指纹=真实
+09-24 22:37:45.165 I/DeviceInfo [DefaultDispatcher-worker-2] 设备信息采集完成: Readboy_C18 / 292 / 9
+09-24 22:37:45.166 D/DeviceInfo [DefaultDispatcher-worker-2] 完整参数:
+model = Readboy_C18
+brand = readboy
+name = msm8998
+device = msm8998
+board = msm8998
+chipset = 292
+hard = qcom
+android = 9
+firmware = unknown
+display = 202308161825
+time = 1692181261
+builder = lys
+serial = unknown
+mac = 
+fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+09-24 22:37:45.176 I/OtaApi [DefaultDispatcher-worker-2] 请求 http://ota.readboy.com/update.php (通道=0, 指纹模式=真实)
+09-24 22:37:45.177 D/OtaApi [DefaultDispatcher-worker-2] 请求参数:
+  updating_apk_version = 1.1
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = unknown
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = qcom
+  serial = unknown
+  chipset = 292
+  id = 0
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+09-24 22:37:45.512 D/OtaApi [DefaultDispatcher-worker-2] HTTP 200, 响应长度 35
+09-24 22:37:45.513 I/OtaApi [DefaultDispatcher-worker-2] 原始响应: {
+    "status": "model not found"
+}
+09-24 22:37:45.514 W/OtaApi [DefaultDispatcher-worker-2] 响应中既无 data.packageUrl 也无 url 字段，判定为无可用升级包
+09-24 22:37:45.516 E/MainActivity [main] 查询失败: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
+响应: {
+    "status": "model not found"
+}
+com.readboy.otadownloader.OtaException: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
+响应: {
+    "status": "model not found"
+}
+	at com.readboy.otadownloader.OtaApi.parseResponse(OtaApi.kt:161)
+	at com.readboy.otadownloader.OtaApi.access$parseResponse(OtaApi.kt:53)
+	at com.readboy.otadownloader.OtaApi$query$2.invokeSuspend(OtaApi.kt:113)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:115)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:103)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:793)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:697)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:684)
+09-24 22:37:51.219 I/MainActivity [main] 已开启完整包模式（将发送自定义指纹）
+09-24 22:37:52.350 I/MainActivity [main] 开始查询: 通道=0, 指纹=forge_full_package
+09-24 22:37:52.370 I/DeviceInfo [DefaultDispatcher-worker-2] 设备信息采集完成: Readboy_C18 / 292 / 9
+09-24 22:37:52.371 D/DeviceInfo [DefaultDispatcher-worker-2] 完整参数:
+model = Readboy_C18
+brand = readboy
+name = msm8998
+device = msm8998
+board = msm8998
+chipset = 292
+hard = qcom
+android = 9
+firmware = unknown
+display = 202308161825
+time = 1692181261
+builder = lys
+serial = unknown
+mac = 
+fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+09-24 22:37:52.379 I/OtaApi [DefaultDispatcher-worker-2] 请求 http://ota.readboy.com/update.php (通道=0, 指纹模式=自定义)
+09-24 22:37:52.381 D/OtaApi [DefaultDispatcher-worker-2] 请求参数:
+  updating_apk_version = 1.1
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = unknown
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = forge_full_package
+  display = 202308161825
+  hard = qcom
+  serial = unknown
+  chipset = 292
+  id = 0
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+09-24 22:37:52.481 D/OtaApi [DefaultDispatcher-worker-2] HTTP 200, 响应长度 35
+09-24 22:37:52.482 I/OtaApi [DefaultDispatcher-worker-2] 原始响应: {
+    "status": "model not found"
+}
+09-24 22:37:52.482 W/OtaApi [DefaultDispatcher-worker-2] 响应中既无 data.packageUrl 也无 url 字段，判定为无可用升级包
+09-24 22:37:52.484 E/MainActivity [main] 查询失败: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
+响应: {
+    "status": "model not found"
+}
+com.readboy.otadownloader.OtaException: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
+响应: {
+    "status": "model not found"
+}
+	at com.readboy.otadownloader.OtaApi.parseResponse(OtaApi.kt:161)
+	at com.readboy.otadownloader.OtaApi.access$parseResponse(OtaApi.kt:53)
+	at com.readboy.otadownloader.OtaApi$query$2.invokeSuspend(OtaApi.kt:113)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:115)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:103)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:793)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:697)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:684)
+09-24 22:38:09.679 D/LogActivity [main] LogActivity onCreate
+
