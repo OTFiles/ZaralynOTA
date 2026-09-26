@@ -54,4 +54,5 @@
     <string name="auto_probe">自动参数探测</string>
     <string name="auto_probe_desc">服务器按 model + board + android + chipset 匹配机型；开启后若默认参数不匹配，会自动尝试多种 chipset 取值。</string>
     <string name="probe_progress">正在探测参数组合 %1$d：%2$s → %3$s</string>
+    <string name="menu_props">系统属性</string>
 </resources>

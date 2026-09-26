@@ -61,6 +61,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
+                R.id.action_props -> {
+                    showSystemProps()
+                    true
+                }
+
                 R.id.action_about -> {
                     showAbout()
                     true
@@ -131,6 +136,37 @@ class MainActivity : AppCompatActivity() {
                 binding.tvDevice.text = "设备信息采集失败: ${it.message}"
                 showError("设备信息", it.message ?: "未知错误", it)
             }
+        // 属性快照（写入日志文件），机型库不匹配时可据此排查
+        runCatching { DeviceInfoCollector.dumpProps() }
+            .onFailure { AppLogger.caught(TAG, "属性快照", it) }
+    }
+
+    /** 查看全部系统属性（诊断机型库不匹配用） */
+    private fun showSystemProps() {
+        val props = runCatching { DeviceInfoCollector.allProps() }.getOrDefault(emptyMap())
+        if (props.isEmpty()) {
+            toast("无法读取系统属性（getprop 不可用）")
+            return
+        }
+        val text = props.toSortedMap().entries.joinToString("\n") { "[${it.key}]: [${it.value}]" }
+        val scroll = android.widget.ScrollView(this).apply {
+            addView(android.widget.TextView(this@MainActivity).apply {
+                this.text = text
+                typeface = android.graphics.Typeface.MONOSPACE
+                setTextIsSelectable(true)
+                textSize = 10f
+                setPadding(32, 24, 32, 24)
+            })
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle("系统属性（${props.size} 项）")
+            .setView(scroll)
+            .setPositiveButton("复制") { _, _ ->
+                copyToClipboard("系统属性", text)
+                toast(getString(R.string.msg_copied))
+            }
+            .setNegativeButton("关闭", null)
+            .show()
     }
 
     private fun currentChannel(): Int = when (binding.rgChannel.checkedRadioButtonId) {

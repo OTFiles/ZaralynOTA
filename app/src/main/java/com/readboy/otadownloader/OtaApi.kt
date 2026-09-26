@@ -243,10 +243,13 @@ object OtaApi {
                 force = data.optString("force", "false").equals("true", ignoreCase = true),
                 name = data.optString("name"),
                 remoteId = data.optInt("id", 0),
-                source = "JSON data.packageUrl",
-                rawResponse = raw
+                source = "JSON data.packageUrl (status=${json.optString("status")})",
+                rawResponse = raw,
+                xmlUrl = json.optString("url").takeIf { it.isNotBlank() }
             )
-            AppLogger.i(TAG, "查询成功(JSON): 版本=${pkg.version}, 大小=${pkg.prettySize()}, 地址=${pkg.url}")
+            AppLogger.i(TAG, "查询成功(JSON): 状态=${json.optString("status")}, 版本=${pkg.version}, 大小=${pkg.prettySize()}")
+            AppLogger.i(TAG, "包地址: ${pkg.url}")
+            pkg.xmlUrl?.let { AppLogger.i(TAG, "配置文件: $it") }
             return pkg
         }
 
@@ -266,10 +269,13 @@ object OtaApi {
         AppLogger.w(TAG, "服务器无可下发升级包，status=$status")
         val hint = when {
             status.contains("model not found", ignoreCase = true) ->
-                "服务器机型库中未匹配到该机型（匹配键：model + board + android + chipset）\n" +
-                    "可打开「自动参数探测」开关后重试，或在「高级参数」里手动指定 chipset。"
+                "服务器机型库中未匹配到该机型（匹配键：model + board + android + chipset，实测结论）\n" +
+                    "请保持「自动参数探测」开启后重试；若仍失败，可到「高级参数」手动指定 chipset。"
             status.contains("no update available", ignoreCase = true) ->
-                "服务器已识别该机型，但当前通道没有可下发的固件包。"
+                "服务器已识别该机型（四元组匹配成功），但按当前 display 版本没有可下发的包。\n" +
+                    "可尝试切换通道，或在「高级参数」里填入其他 display（当前版本号）。"
+            status.contains("no firmware version param", ignoreCase = true) ->
+                "服务器缺少 display 参数（当前版本号）。请在「高级参数」里手动填写 display 后重试。"
             else -> "服务器未返回可用升级包。"
         }
         throw OtaException("$hint\n服务器 status: ${status.ifBlank { raw.take(200) }}")

@@ -96,6 +96,16 @@ object AppLogger {
 
     fun e(tag: String, msg: String, throwable: Throwable? = null) = write('E', tag, msg, throwable)
 
+    /** 仅写入日志文件（不进 Logcat/内存环）——用于属性快照这类批量内容 */
+    fun fileOnly(msg: String) {
+        val now = Date()
+        val time = synchronized(timeFmt) { timeFmt.format(now) }
+        synchronized(lock) {
+            runCatching { appendToFile(now, "$time F/SNAPSHOT $msg") }
+                .onFailure { Log.e(LOGCAT_TAG, "写日志文件失败", it) }
+        }
+    }
+
     /** 捕获异常并记录（返回异常本身便于上层继续处理） */
     fun caught(tag: String, action: String, throwable: Throwable): Throwable {
         write('E', tag, "$action 失败: ${throwable.javaClass.simpleName}: ${throwable.message}", throwable)

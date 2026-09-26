@@ -207,8 +207,11 @@ object DeviceInfoCollector {
             pairs.filter { it.second.isNotBlank() }.forEach { map[it.first] = it.second }
             if (map.isNotEmpty() && list.none { it.second == map }) list.add(label to map)
         }
-        // chipset 维度（最关键）
+        // chipset 维度（最关键）：先试属性原值，再试其它可能存放芯片串的属性
         add("chipset=ro.build.chipset", "chipset" to info.chipsetRaw)
+        propChipsetCandidates().forEach { (key, value) ->
+            add("chipset=$key", "chipset" to value)
+        }
         add("chipset=soc_id", "chipset" to info.socId)
         add("chipset=ro.board.platform", "chipset" to info.boardPlatform)
         add("chipset=ro.hardware", "chipset" to info.hardware)
@@ -238,6 +241,57 @@ object DeviceInfoCollector {
         val get = clazz.getMethod("get", String::class.java)
         (get.invoke(null, key) as? String)?.trim().orEmpty()
     }.getOrDefault("")
+
+    /**
+     * 读取全部系统属性（执行 /system/bin/getprop）
+     * 用于“机型库不匹配”时的现场取证：日志里能看到设备上真实存在的芯片/厂商类属性
+     */
+    fun allProps(): Map<String, String> = runCatching {
+        val process = Runtime.getRuntime().exec(arrayOf("getprop"))
+        val lines = process.inputStream.bufferedReader().use { it.readLines() }
+        runCatching { process.waitFor() }
+        val regex = Regex("^\\[(.+?)\\]: \\[(.*)\\]$")
+        lines.mapNotNull { line ->
+            regex.find(line.trim())?.let { it.groupValues[1] to it.groupValues[2] }
+        }.toMap()
+    }.onFailure { AppLogger.caught(TAG, "读取系统属性(getprop)", it) }.getOrDefault(emptyMap())
+
+    /** 把全部属性写入日志文件（不占内存日志环）并返回过滤后的关键属性行 */
+    fun dumpProps(): List<String> {
+        val props = allProps()
+        if (props.isEmpty()) {
+            AppLogger.w(TAG, "getprop 无输出（可能被系统限制）")
+            return emptyList()
+        }
+        AppLogger.fileOnly("===== 系统属性快照（${props.size} 项）=====")
+        props.toSortedMap().forEach { (k, v) ->
+            AppLogger.fileOnly("  [$k]: [$v]")
+        }
+        val keyword = Regex("chip|soc|vendor|oem|odm|plat|hardware|project|hw|board|rev", RegexOption.IGNORE_CASE)
+        val notable = props.filter { keyword.containsMatchIn(it.key) && it.value.isNotBlank() }
+            .map { "${it.key}=${it.value}" }
+            .sorted()
+        AppLogger.i(TAG, "关键属性(${notable.size}): ${notable.joinToString(", ").take(800)}")
+        return notable
+    }
+
+    /** 从属性中派生 chipset 候选（属性名含芯片/厂商关键词且值非空） */
+    fun propChipsetCandidates(limit: Int = 12): List<Pair<String, String>> {
+        val props = allProps()
+        if (props.isEmpty()) return emptyList()
+        val keyword = Regex("chip|soc|vendor|oem|odm|platform|hardware|project", RegexOption.IGNORE_CASE)
+        val skip = setOf(
+            "ro.build.version.hard", "ro.hardware", "ro.product.board", "ro.board.platform",
+            "ro.product.cpu.abi", "ro.product.cpu.abilist", "ro.product.cpu.abilist32", "ro.product.cpu.abilist64"
+        )
+        return props.entries
+            .filter { keyword.containsMatchIn(it.key) && it.value.isNotBlank() && it.key !in skip }
+            .filter { !it.value.equals(UNKNOWN, ignoreCase = true) }
+            .sortedBy { it.key }
+            .map { it.key to it.value }
+            .distinctBy { it.second }
+            .take(limit)
+    }
 
     /** 与官方一致：属性为空时回退 Build，仍为空则回退 "unknown" */
     private fun propOr(propKey: String, fallback: String): String {
