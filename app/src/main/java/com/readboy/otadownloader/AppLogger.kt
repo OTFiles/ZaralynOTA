@@ -96,6 +96,11 @@ object AppLogger {
 
     fun e(tag: String, msg: String, throwable: Throwable? = null) = write('E', tag, msg, throwable)
 
+    /** 当前时间字符串（yyyy-MM-dd HH:mm:ss），供报告类文本使用 */
+    fun nowString(): String = synchronized(timeFmt) {
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
+    }
+
     /** 仅写入日志文件（不进 Logcat/内存环）——用于属性快照这类批量内容 */
     fun fileOnly(msg: String) {
         val now = Date()

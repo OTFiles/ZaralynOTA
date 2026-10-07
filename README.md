@@ -2,6 +2,13 @@
 
 读书郎学习平板**固件包下载工具**（Material Design 3 / Kotlin / Android）。
 
+**支持系统：Android 5.0 (API 21) ~ Android 14 (API 34)，含老机型 Android 7.0/7.1（API 24/25）。**
+- `minSdk 21`，无 native 库（任何 ABI 均可安装）
+- 已开启 Java 8+ API 脱糖（core library desugaring），老系统不会因默认方法报 `NoSuchMethodError`
+- 系统属性读取三通道回退：`SystemProperties` 反射 → `getprop` → `/system/build.prop`（老 ROM 上反射/命令被限制时仍能取到机型参数）
+- launcher 图标提供 PNG（mipmap 各密度）+ API 26+ 自适应图标，避免老 Launcher 显示空白
+- 内置「兼容性自检」（菜单）：逐项检查系统版本、属性读取、OTA 服务器连通、下载目录可写、剩余空间、日志与 FileProvider，一键复制报告
+
 按当前机型的设备参数向读书郎 OTA 服务器查询固件地址，支持**完整包模式**并可直接下载、校验 MD5。
 
 > 逆向参考对象：`DreamUpdate.apk`（com.dream.ota.update，系统更新应用）
@@ -20,6 +27,7 @@
 | 直接下载 | OkHttp 流式下载，实时进度/速度，边下边算 MD5 并与服务器比对 |
 | 日志系统 | Logcat + 内存环形缓冲 + 按天滚动文件（自动清理），崩溃写入 `last_crash.txt` |
 | 错误捕捉 | 网络/HTTP/JSON/XML/IO 全链路捕获，界面可查看堆栈与日志 |
+| 兼容性自检 | 老机型排障报告：系统版本/属性读取能力/OTA 连通/目录可写/剩余空间/FileProvider |
 
 ## 逆向得到的接口约定
 

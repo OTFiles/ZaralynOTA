@@ -15,8 +15,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.readboy.otadownloader.databinding.ActivityMainBinding
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
 
@@ -63,6 +65,11 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.action_props -> {
                     showSystemProps()
+                    true
+                }
+
+                R.id.action_compat -> {
+                    showCompatCheck()
                     true
                 }
 
@@ -136,9 +143,43 @@ class MainActivity : AppCompatActivity() {
                 binding.tvDevice.text = "设备信息采集失败: ${it.message}"
                 showError("设备信息", it.message ?: "未知错误", it)
             }
-        // 属性快照（写入日志文件），机型库不匹配时可据此排查
-        runCatching { DeviceInfoCollector.dumpProps() }
-            .onFailure { AppLogger.caught(TAG, "属性快照", it) }
+        // 属性快照写入日志文件（约数百行 IO，放到后台线程）
+        lifecycleScope.launch(Dispatchers.IO) {
+            runCatching { DeviceInfoCollector.dumpProps() }
+                .onFailure { AppLogger.caught(TAG, "属性快照", it) }
+        }
+    }
+
+    /** 兼容性自检（老机型排障用；网络/磁盘检查放在 IO 线程） */
+    private fun showCompatCheck() {
+        toast("正在自检…")
+        lifecycleScope.launch {
+            val report = withContext(Dispatchers.IO) {
+                runCatching {
+                    val items = CompatCheck.run(this@MainActivity)
+                    CompatCheck.report(this@MainActivity, items)
+                }.onFailure { AppLogger.caught(TAG, "兼容性自检", it) }
+                    .getOrElse { "自检失败: ${it.message}" }
+            }
+            val scroll = android.widget.ScrollView(this@MainActivity).apply {
+                addView(android.widget.TextView(this@MainActivity).apply {
+                    text = report
+                    typeface = android.graphics.Typeface.MONOSPACE
+                    setTextIsSelectable(true)
+                    textSize = 12f
+                    setPadding(32, 24, 32, 24)
+                })
+            }
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(R.string.compat_title)
+                .setView(scroll)
+                .setPositiveButton("复制报告") { _, _ ->
+                    copyToClipboard("兼容性自检", report)
+                    toast(getString(R.string.msg_copied))
+                }
+                .setNegativeButton("关闭", null)
+                .show()
+        }
     }
 
     /** 查看全部系统属性（诊断机型库不匹配用） */

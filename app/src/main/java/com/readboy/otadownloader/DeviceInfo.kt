@@ -89,6 +89,11 @@ object DeviceInfoCollector {
     private const val TAG = "DeviceInfo"
     private const val UNKNOWN = "unknown"
 
+    /** 属性缓存（反射/getprop/build.prop 三通道） */
+    private val propCache = HashMap<String, String>()
+    private var buildPropCache: Map<String, String>? = null
+    private var getpropCache: Map<String, String>? = null
+
     /** 官方特判机型：chipset 需要按 soc_id 追加后缀 */
     private val CHIPSET_SUFFIX_MODELS = mapOf(
         "294" to "_MSM8937",
@@ -114,7 +119,9 @@ object DeviceInfoCollector {
             time = propOr("ro.build.date.utc", (Build.TIME / 1000).toString()),
             builder = propOr("ro.build.user", Build.USER),
             fingerprint = propOr("ro.build.fingerprint", Build.FINGERPRINT),
-            display = displayRaw.ifBlank { Build.DISPLAY.orEmpty() },
+            display = displayRaw.ifBlank { prop("ro.build.display.ota") }
+                .ifBlank { prop("ro.build.display.id") }
+                .ifBlank { Build.DISPLAY.orEmpty() },
             hard = prop("ro.build.version.hard"),
             serial = readSerial(context),
             chipset = resolveChipset(model, chipsetRaw, socId),
@@ -129,6 +136,12 @@ object DeviceInfoCollector {
         )
         AppLogger.i(TAG, "设备信息: ${info.model} / board=${info.board} / android=${info.android}")
         AppLogger.i(TAG, "chipset(发给服务器)=${info.chipset.ifBlank { "（空）" }} | ro.build.chipset=${info.chipsetRaw.ifBlank { "（空）" }} | soc_id=${info.socId.ifBlank { "（空）" }}")
+        val (reflectionOk, getpropOk, propFileCount) = propDiagnostics()
+        AppLogger.i(
+            TAG,
+            "运行环境: Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT}) / ABI=${Build.SUPPORTED_ABIS.joinToString()} " +
+                "/ 属性读取: 反射=${if (reflectionOk) "OK" else "失败"}, getprop=${if (getpropOk) "OK" else "失败"}, build.prop=$propFileCount 项"
+        )
         AppLogger.d(TAG, "完整参数:\n${info.detail()}")
         return info
     }
@@ -235,26 +248,95 @@ object DeviceInfoCollector {
 
     // ==================== 取值工具 ====================
 
-    /** 系统属性（反射 SystemProperties.get(String)），失败返回空串 */
-    fun prop(key: String): String = runCatching {
-        val clazz = Class.forName("android.os.SystemProperties")
-        val get = clazz.getMethod("get", String::class.java)
-        (get.invoke(null, key) as? String)?.trim().orEmpty()
-    }.getOrDefault("")
+    /** 系统属性（反射 → getprop → build.prop 三通道），结果缓存 */
+    fun prop(key: String): String = propCache.getOrPut(key) { readProp(key) }
+
+    private fun readProp(key: String): String {
+        // 1) 反射 android.os.SystemProperties.get(String)：与官方应用同源，Android 全版本可用
+        runCatching {
+            val clazz = Class.forName("android.os.SystemProperties")
+            val get = clazz.getMethod("get", String::class.java)
+            (get.invoke(null, key) as? String)?.trim().orEmpty()
+        }.getOrNull()?.takeIf { it.isNotEmpty() }?.let { return it }
+
+        // 2) getprop <key>：老 ROM / 反射被阉割时的兑底
+        runCatching {
+            val process = Runtime.getRuntime().exec(arrayOf("getprop", key))
+            val out = process.inputStream.bufferedReader().use { it.readText() }.trim()
+            runCatching { process.waitFor() }
+            out
+        }.getOrNull()?.takeIf { it.isNotEmpty() }?.let { return it }
+
+        // 3) 直接读属性文件（/system/build.prop 等，多数机器是世界可读）
+        buildPropValues()[key]?.takeIf { it.isNotEmpty() }?.let { return it }
+        return ""
+    }
+
+    /** /system/build.prop 等属性文件（缓存） */
+    private fun buildPropValues(): Map<String, String> {
+        buildPropCache?.let { return it }
+        val files = listOf(
+            "/system/build.prop",
+            "/vendor/build.prop",
+            "/system/vendor/build.prop",
+            "/odm/build.prop",
+            "/default.prop"
+        )
+        val map = linkedMapOf<String, String>()
+        files.forEach { path ->
+            runCatching {
+                File(path).takeIf { it.canRead() }?.readLines()?.forEach { line ->
+                    val text = line.trim()
+                    if (text.isEmpty() || text.startsWith("#") || !text.contains('=')) return@forEach
+                    val idx = text.indexOf('=')
+                    val k = text.substring(0, idx).trim()
+                    val v = text.substring(idx + 1).trim()
+                    if (k.isNotEmpty()) map.putIfAbsent(k, v)
+                }
+            }.onFailure { AppLogger.d(TAG, "读取 $path 失败: ${it.message}") }
+        }
+        AppLogger.i(TAG, "属性文件解析: ${map.size} 项（build.prop）")
+        buildPropCache = map
+        return map
+    }
 
     /**
-     * 读取全部系统属性（执行 /system/bin/getprop）
-     * 用于“机型库不匹配”时的现场取证：日志里能看到设备上真实存在的芯片/厂商类属性
+     * 读取全部系统属性：getprop 全量 + build.prop 文件补全（老 ROM 上 getprop 可能不可用）
+     * 用于“机型库不匹配”时的现场取证
      */
     fun allProps(): Map<String, String> = runCatching {
-        val process = Runtime.getRuntime().exec(arrayOf("getprop"))
-        val lines = process.inputStream.bufferedReader().use { it.readLines() }
-        runCatching { process.waitFor() }
-        val regex = Regex("^\\[(.+?)\\]: \\[(.*)\\]$")
-        lines.mapNotNull { line ->
-            regex.find(line.trim())?.let { it.groupValues[1] to it.groupValues[2] }
-        }.toMap()
-    }.onFailure { AppLogger.caught(TAG, "读取系统属性(getprop)", it) }.getOrDefault(emptyMap())
+        val result = linkedMapOf<String, String>()
+        result.putAll(buildPropValues())
+        result.putAll(getpropAll())
+        result
+    }.onFailure { AppLogger.caught(TAG, "读取系统属性", it) }.getOrDefault(emptyMap())
+
+    /** getprop 全量输出（缓存） */
+    private fun getpropAll(): Map<String, String> {
+        getpropCache?.let { return it }
+        val map = runCatching {
+            val process = Runtime.getRuntime().exec(arrayOf("getprop"))
+            val lines = process.inputStream.bufferedReader().use { it.readLines() }
+            runCatching { process.waitFor() }
+            val regex = Regex("^\\[(.+?)\\]: \\[(.*)\\]$")
+            lines.mapNotNull { line ->
+                regex.find(line.trim())?.let { it.groupValues[1] to it.groupValues[2] }
+            }.toMap()
+        }.onFailure { AppLogger.d(TAG, "getprop 不可用: ${it.message}") }.getOrDefault(emptyMap())
+        getpropCache = map
+        return map
+    }
+
+    /** 属性读取能力自检结果（供日志/兼容性检查） */
+    fun propDiagnostics(): Triple<Boolean, Boolean, Int> {
+        val reflectionOk = runCatching {
+            val clazz = Class.forName("android.os.SystemProperties")
+            clazz.getMethod("get", String::class.java).invoke(null, "ro.build.version.sdk")
+        }.isSuccess
+        val getpropCount = getpropAll().size
+        val buildPropCount = buildPropValues().size
+        return Triple(reflectionOk, getpropCount > 0, buildPropCount)
+    }
 
     /** 把全部属性写入日志文件（不占内存日志环）并返回过滤后的关键属性行 */
     fun dumpProps(): List<String> {

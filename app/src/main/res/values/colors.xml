@@ -2,6 +2,7 @@
 <resources>
     <!-- Material Design 3 调色板（静态，兼容 Android 12 以下设备） -->
     <color name="md_primary">#1B6C3A</color>
+    <color name="ic_launcher_background">#1B6C3A</color>
     <color name="md_on_primary">#FFFFFF</color>
     <color name="md_primary_container">#A6F5B8</color>
     <color name="md_on_primary_container">#00210D</color>
