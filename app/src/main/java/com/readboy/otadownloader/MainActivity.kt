@@ -276,6 +276,26 @@ class MainActivity : AppCompatActivity() {
                 showResult(pkg)
                 val hit = matchedLabel?.let { "（命中：$it）" }.orEmpty()
                 Snackbar.make(binding.root, "查询成功: 版本 ${pkg.version}$hit", Snackbar.LENGTH_LONG).show()
+            } catch (e: OtaStatusException) {
+                // 服务端已“定论”的状态：机型匹配成功但没有包 —— 不是我们的错误，给结论 + 目录探测
+                if (e.status == OtaStatus.ALREADY_LATEST || e.status == OtaStatus.NO_UPDATE) {
+                    val info = deviceInfo
+                    val chipset = manualOverrides()["chipset"]?.takeIf { it.isNotBlank() } ?: info?.chipset.orEmpty()
+                    val dirReport = withContext(Dispatchers.IO) {
+                        OtaApi.probeFirmwareDir(info?.model.orEmpty(), chipset)
+                    }
+                    AppLogger.i(TAG, "查询结论(${e.status}): ${e.message}")
+                    AppLogger.i(TAG, "固件目录探测: $dirReport")
+                    showInfo(
+                        title = "查询结论：无包可下",
+                        message = (e.message ?: "") +
+                            "\n\n发送的 chipset: " + chipset.ifBlank { "（空）" } +
+                            "\n\n【服务端固件目录探测】\n" + dirReport
+                    )
+                } else {
+                    AppLogger.e(TAG, "查询失败: ${e.message}", e)
+                    showError("查询更新", e.message ?: "未知错误", e)
+                }
             } catch (e: OtaException) {
                 AppLogger.e(TAG, "查询失败: ${e.message}", e)
                 showError("查询更新", e.message ?: "未知错误", e)
@@ -569,6 +589,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun toast(message: String) {
         runCatching { Toast.makeText(this, message, Toast.LENGTH_SHORT).show() }
+    }
+
+    /** 信息类弹窗（不是错误），带复制与查看日志 */
+    private fun showInfo(title: String, message: String) {
+        runCatching {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("复制") { _, _ ->
+                    copyToClipboard(title, message)
+                    toast(getString(R.string.msg_copied))
+                }
+                .setNeutralButton("查看日志") { _, _ ->
+                    startActivity(Intent(this, LogActivity::class.java))
+                }
+                .setNegativeButton("关闭", null)
+                .show()
+        }.onFailure { AppLogger.caught(TAG, "显示信息弹窗", it) }
     }
 
     private fun showError(action: String, message: String, throwable: Throwable? = null) {

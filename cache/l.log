@@ -1,160 +1,481 @@
-===== ota-20260924.log =====
-09-24 22:37:25.194 I/ZaralynOTA [main] ======== 应用启动 ========
-09-24 22:37:25.195 I/ZaralynOTA [main] 日志目录: /storage/emulated/0/Android/data/com.readboy.otadownloader/files/logs
-09-24 22:37:25.195 I/ZaralynOTA [main] 设备: READBOY Readboy_C18, Android 9 (SDK 28)
-09-24 22:37:25.195 I/ZaralynOTA [main] APK 版本: 1.1 (2)
-09-24 22:37:25.222 I/MainActivity [main] MainActivity onCreate
-09-24 22:37:25.350 I/DeviceInfo [main] 设备信息采集完成: Readboy_C18 / 292 / 9
-09-24 22:37:25.351 D/DeviceInfo [main] 完整参数:
+10-07 16:33:51.055 I/ZaralynOTA [main] ======== 应用启动 ========
+10-07 16:33:51.057 I/ZaralynOTA [main] 日志目录: /storage/emulated/0/Android/data/com.readboy.otadownloader/files/logs
+10-07 16:33:51.057 I/ZaralynOTA [main] 设备: READBOY Readboy_C18, Android 9 (SDK 28)
+10-07 16:33:51.057 I/ZaralynOTA [main] APK 版本: 1.4 (5)
+10-07 16:33:51.088 I/MainActivity [main] MainActivity onCreate
+10-07 16:33:51.238 I/DeviceInfo [main] 属性文件解析: 0 项（build.prop）
+10-07 16:33:51.269 I/DeviceInfo [main] 设备信息: Readboy_C18 / board=msm8998 / android=9
+10-07 16:33:51.269 I/DeviceInfo [main] chipset(发给服务器)=QCOM_8998_android9_C18 | ro.build.chipset=QCOM_8998_android9_C18 | soc_id=292
+10-07 16:33:51.292 I/DeviceInfo [main] 运行环境: Android 9 (API 28) / ABI=arm64-v8a, armeabi-v7a, armeabi / 属性读取: 反射=OK, getprop=OK, build.prop=0 项
+10-07 16:33:51.292 D/DeviceInfo [main] 完整参数:
 model = Readboy_C18
 brand = readboy
 name = msm8998
 device = msm8998
 board = msm8998
-chipset = 292
-hard = qcom
+chipset = QCOM_8998_android9_C18
+hard = （空）
 android = 9
-firmware = unknown
+firmware = （空）
 display = 202308161825
 time = 1692181261
 builder = lys
 serial = unknown
-mac = 
+mac = （空）
 fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
-09-24 22:37:45.131 I/MainActivity [main] 开始查询: 通道=0, 指纹=真实
-09-24 22:37:45.165 I/DeviceInfo [DefaultDispatcher-worker-2] 设备信息采集完成: Readboy_C18 / 292 / 9
-09-24 22:37:45.166 D/DeviceInfo [DefaultDispatcher-worker-2] 完整参数:
+--- 原始属性 ---
+ro.build.chipset = QCOM_8998_android9_C18
+soc_id = 292
+ro.board.platform = msm8998
+ro.hardware = qcom
+ro.fota.version = 202308161825
+soft = C18_202308161825
+10-07 16:33:51.366 I/DeviceInfo [DefaultDispatcher-worker-1] 关键属性(48): debug.sf.enable_hwc_vds=1, debug.sf.hw=1, hwservicemanager.ready=true, init.svc.hwservicemanager=running, init.svc.vendor-sensor-sh=stopped, persist.hwc.enable_vds=1, persist.vendor.dpm.tcm=2, qemu.hw.mainkeys=0, ro.board.platform=msm8998, ro.boot.hardware=qcom, ro.boot.product.hardware.sku=292, ro.build.chipset=QCOM_8998_android9_C18, ro.build.version.preview_sdk=0, ro.hardware.egl=adreno, ro.hardware.keystore_desede=true, ro.hardware.nfc_nci=nqx.default, ro.hardware.vulkan=adreno, ro.hardware=qcom, ro.hwui.drop_shadow_cache_size=6, ro.hwui.gradient_cache_size=1, ro.hwui.layer_cache_size=48, ro.hwui.path_cache_size=32, ro.hwui.r_buffer_cache_size=8, ro.hwui.text_large_cache_height=4096, ro.hwui.text_large_cache_width=2048, ro.hwui.text_small_cache_height=1024, ro.hwui.text_small_cache_wid
+10-07 16:33:54.163 I/MainActivity [main] 开始查询: 通道=0, 指纹=真实, 自动探测=true
+10-07 16:33:54.204 I/DeviceInfo [DefaultDispatcher-worker-1] 设备信息: Readboy_C18 / board=msm8998 / android=9
+10-07 16:33:54.204 I/DeviceInfo [DefaultDispatcher-worker-1] chipset(发给服务器)=QCOM_8998_android9_C18 | ro.build.chipset=QCOM_8998_android9_C18 | soc_id=292
+10-07 16:33:54.205 I/DeviceInfo [DefaultDispatcher-worker-1] 运行环境: Android 9 (API 28) / ABI=arm64-v8a, armeabi-v7a, armeabi / 属性读取: 反射=OK, getprop=OK, build.prop=0 项
+10-07 16:33:54.205 D/DeviceInfo [DefaultDispatcher-worker-1] 完整参数:
 model = Readboy_C18
 brand = readboy
 name = msm8998
 device = msm8998
 board = msm8998
-chipset = 292
-hard = qcom
+chipset = QCOM_8998_android9_C18
+hard = （空）
 android = 9
-firmware = unknown
+firmware = （空）
 display = 202308161825
 time = 1692181261
 builder = lys
 serial = unknown
-mac = 
+mac = （空）
 fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
-09-24 22:37:45.176 I/OtaApi [DefaultDispatcher-worker-2] 请求 http://ota.readboy.com/update.php (通道=0, 指纹模式=真实)
-09-24 22:37:45.177 D/OtaApi [DefaultDispatcher-worker-2] 请求参数:
-  updating_apk_version = 1.1
+--- 原始属性 ---
+ro.build.chipset = QCOM_8998_android9_C18
+soc_id = 292
+ro.board.platform = msm8998
+ro.hardware = qcom
+ro.fota.version = 202308161825
+soft = C18_202308161825
+10-07 16:33:54.221 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.222 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
   model = Readboy_C18
   brand = readboy
   name = msm8998
   device = msm8998
   board = msm8998
   mac = 
-  firmware = unknown
+  firmware = 
   android = 9
   time = 1692181261
   builder = lys
   fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
   display = 202308161825
-  hard = qcom
+  hard = 
   serial = unknown
-  chipset = 292
-  id = 0
+  chipset = QCOM_8998_android9_C18
+  id = 1000
   debug = 0
   is_log = 1
   ip = 192.168.1.4
   uid = 
   username = 
   realname = 
-09-24 22:37:45.512 D/OtaApi [DefaultDispatcher-worker-2] HTTP 200, 响应长度 35
-09-24 22:37:45.513 I/OtaApi [DefaultDispatcher-worker-2] 原始响应: {
-    "status": "model not found"
+10-07 16:33:54.583 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 34
+10-07 16:33:54.583 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "already latest"
 }
-09-24 22:37:45.514 W/OtaApi [DefaultDispatcher-worker-2] 响应中既无 data.packageUrl 也无 url 字段，判定为无可用升级包
-09-24 22:37:45.516 E/MainActivity [main] 查询失败: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
-响应: {
-    "status": "model not found"
-}
-com.readboy.otadownloader.OtaException: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
-响应: {
-    "status": "model not found"
-}
-	at com.readboy.otadownloader.OtaApi.parseResponse(OtaApi.kt:161)
-	at com.readboy.otadownloader.OtaApi.access$parseResponse(OtaApi.kt:53)
-	at com.readboy.otadownloader.OtaApi$query$2.invokeSuspend(OtaApi.kt:113)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:115)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:103)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:793)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:697)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:684)
-09-24 22:37:51.219 I/MainActivity [main] 已开启完整包模式（将发送自定义指纹）
-09-24 22:37:52.350 I/MainActivity [main] 开始查询: 通道=0, 指纹=forge_full_package
-09-24 22:37:52.370 I/DeviceInfo [DefaultDispatcher-worker-2] 设备信息采集完成: Readboy_C18 / 292 / 9
-09-24 22:37:52.371 D/DeviceInfo [DefaultDispatcher-worker-2] 完整参数:
-model = Readboy_C18
-brand = readboy
-name = msm8998
-device = msm8998
-board = msm8998
-chipset = 292
-hard = qcom
-android = 9
-firmware = unknown
-display = 202308161825
-time = 1692181261
-builder = lys
-serial = unknown
-mac = 
-fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
-09-24 22:37:52.379 I/OtaApi [DefaultDispatcher-worker-2] 请求 http://ota.readboy.com/update.php (通道=0, 指纹模式=自定义)
-09-24 22:37:52.381 D/OtaApi [DefaultDispatcher-worker-2] 请求参数:
-  updating_apk_version = 1.1
+10-07 16:33:54.583 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=already latest
+10-07 16:33:54.585 W/OtaApi [DefaultDispatcher-worker-1] 探测第 1 次（官方默认参数）失败：失败
+10-07 16:33:54.586 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.587 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
   model = Readboy_C18
   brand = readboy
   name = msm8998
   device = msm8998
   board = msm8998
   mac = 
-  firmware = unknown
+  firmware = 
   android = 9
   time = 1692181261
   builder = lys
-  fingerprint = forge_full_package
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
   display = 202308161825
-  hard = qcom
+  hard = 
   serial = unknown
-  chipset = 292
-  id = 0
+  chipset = stopped
+  id = 1000
   debug = 0
   is_log = 1
   ip = 192.168.1.4
   uid = 
   username = 
   realname = 
-09-24 22:37:52.481 D/OtaApi [DefaultDispatcher-worker-2] HTTP 200, 响应长度 35
-09-24 22:37:52.482 I/OtaApi [DefaultDispatcher-worker-2] 原始响应: {
+10-07 16:33:54.694 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:54.694 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
     "status": "model not found"
 }
-09-24 22:37:52.482 W/OtaApi [DefaultDispatcher-worker-2] 响应中既无 data.packageUrl 也无 url 字段，判定为无可用升级包
-09-24 22:37:52.484 E/MainActivity [main] 查询失败: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
-响应: {
+10-07 16:33:54.695 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:54.696 W/OtaApi [DefaultDispatcher-worker-1] 探测第 2 次（chipset=init.svc.vendor-sensor-sh）失败：机型不匹配
+10-07 16:33:54.699 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.700 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = 2
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:54.784 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:54.784 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
     "status": "model not found"
 }
-com.readboy.otadownloader.OtaException: 服务器未返回可用升级包（可能已是最新版本，或该机型无此通道固件）
-响应: {
+10-07 16:33:54.785 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:54.786 W/OtaApi [DefaultDispatcher-worker-1] 探测第 3 次（chipset=persist.vendor.dpm.tcm）失败：机型不匹配
+10-07 16:33:54.789 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.790 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = qcom
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:54.885 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:54.886 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
     "status": "model not found"
 }
-	at com.readboy.otadownloader.OtaApi.parseResponse(OtaApi.kt:161)
-	at com.readboy.otadownloader.OtaApi.access$parseResponse(OtaApi.kt:53)
-	at com.readboy.otadownloader.OtaApi$query$2.invokeSuspend(OtaApi.kt:113)
+10-07 16:33:54.886 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:54.887 W/OtaApi [DefaultDispatcher-worker-1] 探测第 4 次（chipset=ro.boot.hardware）失败：机型不匹配
+10-07 16:33:54.887 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.888 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = 292
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:54.972 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:54.973 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:54.973 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:54.973 W/OtaApi [DefaultDispatcher-worker-1] 探测第 5 次（chipset=ro.boot.product.hardware.sku）失败：机型不匹配
+10-07 16:33:54.974 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:54.975 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = adreno
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.085 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.085 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.085 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.085 W/OtaApi [DefaultDispatcher-worker-1] 探测第 6 次（chipset=ro.hardware.egl）失败：机型不匹配
+10-07 16:33:55.086 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.086 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = true
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.236 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.237 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.238 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.239 W/OtaApi [DefaultDispatcher-worker-1] 探测第 7 次（chipset=ro.hardware.keystore_desede）失败：机型不匹配
+10-07 16:33:55.241 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.242 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = nqx.default
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.325 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.326 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.327 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.329 W/OtaApi [DefaultDispatcher-worker-1] 探测第 8 次（chipset=ro.hardware.nfc_nci）失败：机型不匹配
+10-07 16:33:55.334 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.336 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = 1
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.453 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.455 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.456 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.457 W/OtaApi [DefaultDispatcher-worker-1] 探测第 9 次（chipset=ro.oem_unlock_supported）失败：机型不匹配
+10-07 16:33:55.460 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.461 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = RB961P
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.581 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.582 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.583 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.585 W/OtaApi [DefaultDispatcher-worker-1] 探测第 10 次（chipset=ro.product.hardware.version）失败：机型不匹配
+10-07 16:33:55.590 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.592 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = readboy
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.712 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.713 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.714 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.716 W/OtaApi [DefaultDispatcher-worker-1] 探测第 11 次（chipset=ro.product.vendor.brand）失败：机型不匹配
+10-07 16:33:55.720 I/OtaApi [DefaultDispatcher-worker-1] 请求 http://ota.readboy.com/update.php
+10-07 16:33:55.721 D/OtaApi [DefaultDispatcher-worker-1] 请求参数:
+  updating_apk_version = 1.4
+  model = Readboy_C18
+  brand = readboy
+  name = msm8998
+  device = msm8998
+  board = msm8998
+  mac = 
+  firmware = 
+  android = 9
+  time = 1692181261
+  builder = lys
+  fingerprint = readboy/msm8998/msm8998:9/PKQ1.190908.001/202308161825:user/release-keys
+  display = 202308161825
+  hard = 
+  serial = unknown
+  chipset = msm8998
+  id = 1000
+  debug = 0
+  is_log = 1
+  ip = 192.168.1.4
+  uid = 
+  username = 
+  realname = 
+10-07 16:33:55.841 D/OtaApi [DefaultDispatcher-worker-1] HTTP 200, 响应长度 35
+10-07 16:33:55.841 I/OtaApi [DefaultDispatcher-worker-1] 原始响应: {
+    "status": "model not found"
+}
+10-07 16:33:55.842 W/OtaApi [DefaultDispatcher-worker-1] 服务器无可下发升级包，status=model not found
+10-07 16:33:55.843 W/OtaApi [DefaultDispatcher-worker-1] 探测第 12 次（chipset=ro.product.vendor.device）失败：机型不匹配
+10-07 16:33:55.845 E/MainActivity [main] 查询失败: 服务器机型库中未匹配到该机型（匹配键：model + board + android + chipset，实测结论）
+请保持「自动参数探测」开启后重试；若仍失败，可到「高级参数」手动指定 chipset。
+服务器 status: model not found
+
+已尝试 12 种参数组合：
+  1. 官方默认参数 -> 失败
+  2. chipset=init.svc.vendor-sensor-sh -> 机型不匹配
+  3. chipset=persist.vendor.dpm.tcm -> 机型不匹配
+  4. chipset=ro.boot.hardware -> 机型不匹配
+  5. chipset=ro.boot.product.hardware.sku -> 机型不匹配
+  6. chipset=ro.hardware.egl -> 机型不匹配
+  7. chipset=ro.hardware.keystore_desede -> 机型不匹配
+  8. chipset=ro.hardware.nfc_nci -> 机型不匹配
+  9. chipset=ro.oem_unlock_supported -> 机型不匹配
+  10. chipset=ro.product.hardware.version -> 机型不匹配
+  11. chipset=ro.product.vendor.brand -> 机型不匹配
+  12. chipset=ro.product.vendor.device -> 机型不匹配
+
+可在「高级参数」里手动指定 chipset 后再试。
+com.readboy.otadownloader.OtaException: 服务器机型库中未匹配到该机型（匹配键：model + board + android + chipset，实测结论）
+请保持「自动参数探测」开启后重试；若仍失败，可到「高级参数」手动指定 chipset。
+服务器 status: model not found
+
+已尝试 12 种参数组合：
+  1. 官方默认参数 -> 失败
+  2. chipset=init.svc.vendor-sensor-sh -> 机型不匹配
+  3. chipset=persist.vendor.dpm.tcm -> 机型不匹配
+  4. chipset=ro.boot.hardware -> 机型不匹配
+  5. chipset=ro.boot.product.hardware.sku -> 机型不匹配
+  6. chipset=ro.hardware.egl -> 机型不匹配
+  7. chipset=ro.hardware.keystore_desede -> 机型不匹配
+  8. chipset=ro.hardware.nfc_nci -> 机型不匹配
+  9. chipset=ro.oem_unlock_supported -> 机型不匹配
+  10. chipset=ro.product.hardware.version -> 机型不匹配
+  11. chipset=ro.product.vendor.brand -> 机型不匹配
+  12. chipset=ro.product.vendor.device -> 机型不匹配
+
+可在「高级参数」里手动指定 chipset 后再试。
+	at com.readboy.otadownloader.MainActivity$queryUpdate$1.invokeSuspend(MainActivity.kt:262)
 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:115)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:103)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:793)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:697)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:684)
-09-24 22:38:09.679 D/LogActivity [main] LogActivity onCreate
-
+	at android.os.Handler.handleCallback(Handler.java:873)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loop(Looper.java:193)
+	at android.app.ActivityThread.main(ActivityThread.java:6747)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-07 16:34:29.953 D/LogActivity [main] LogActivity onCreate

@@ -13,7 +13,23 @@ import java.util.concurrent.TimeUnit
 import javax.xml.parsers.DocumentBuilderFactory
 
 /** OTA 业务异常（可读错误信息直接面向用户） */
-class OtaException(message: String, cause: Throwable? = null) : Exception(message, cause)
+open class OtaException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
+/** 服务器 status 语义（实测归纳） */
+enum class OtaStatus {
+    MODEL_NOT_FOUND,   // 机型库四元组未匹配
+    ALREADY_LATEST,    // 机型匹配成功，且当前版本就是服务端记录的最新版（正常结果）
+    NO_UPDATE,         // 机型匹配成功，但按当前 display 没有可下发包
+    NO_DISPLAY,        // 缺 display 参数
+    UNKNOWN
+}
+
+/** 带 status 语义的异常，便于上层区分“需探测”与“已定论” */
+class OtaStatusException(
+    val status: OtaStatus,
+    message: String,
+    cause: Throwable? = null
+) : OtaException(message, cause)
 
 /** 查询到的升级包信息 */
 data class OtaPackage(
@@ -78,6 +94,8 @@ object OtaApi {
     private const val TAG = "OtaApi"
     private const val ENDPOINT = "http://ota.readboy.com/update.php"
     private const val STATUS_MODEL_NOT_FOUND = "model not found"
+    private const val STATUS_ALREADY_LATEST = "already latest"
+    private const val CONFIG_XML_BASE = "http://ota.readboy.com/ConfigXml/"
 
     private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
@@ -153,9 +171,9 @@ object OtaApi {
                 return@withContext QueryOutcome(pkg, attempts, label, params, null)
             }.onFailure { e ->
                 val msg = e.message.orEmpty()
-                lastError = msg
                 val status = when {
                     msg.contains(STATUS_MODEL_NOT_FOUND, ignoreCase = true) -> "机型不匹配"
+                    msg.contains(STATUS_ALREADY_LATEST, ignoreCase = true) -> "已是最新版本"
                     msg.contains("no update available", ignoreCase = true) -> "该机型无此版本"
                     else -> "失败"
                 }
@@ -170,6 +188,11 @@ object OtaApi {
                 )
                 onAttempt(attempts.last())
                 AppLogger.w(TAG, "探测第 $index 次（$label）失败：$status")
+                // 只有“机型不匹配”才值得继续换 chipset；其余 status 已是定论（如已是最新版本），直接终止
+                if (e is OtaStatusException && e.status != OtaStatus.MODEL_NOT_FOUND) {
+                    AppLogger.i(TAG, "服务端 status=${e.status}，不再继续探测参数")
+                    throw e
+                }
             }
         }
 
@@ -216,6 +239,35 @@ object OtaApi {
         }
 
         return parseResponse(raw)
+    }
+
+    /**
+     * 探测服务端是否给该机型上传过固件配置（ConfigXml 目录存在性）
+     * 目录名规律（实测）：<model>_<chipset>，如 Readboy_G90_AllWinner_8916_G90_01
+     * 403=目录存在（禁列目录）/ 200=存在且可访问 / 404=从未上传过
+     */
+    suspend fun probeFirmwareDir(model: String, chipset: String): String = withContext(Dispatchers.IO) {
+        if (model.isBlank() || chipset.isBlank()) {
+            return@withContext "跳过（model 或 chipset 为空，无法拼出目录名）"
+        }
+        val dir = "${model}_$chipset"
+        val url = "$CONFIG_XML_BASE$dir/"
+        runCatching {
+            val request = Request.Builder().url(url).get().build()
+            client.newCall(request).execute().use { response ->
+                val desc = when (response.code) {
+                    200 -> "目录存在且可访问"
+                    403 -> "目录存在（服务端禁止列目录）"
+                    404 -> "目录不存在 —— 服务端从未为该机型上传过固件配置，因此无包可下"
+                    else -> "HTTP ${response.code}"
+                }
+                AppLogger.i(TAG, "固件目录探测: $url -> ${response.code} ($desc)")
+                "$desc\n地址: $url"
+            }
+        }.getOrElse {
+            AppLogger.caught(TAG, "固件目录探测", it)
+            "探测失败: ${it.message}\n地址: $url"
+        }
     }
 
     /** 解析响应：JSON 直出 或 XML 配置地址；无包时抛 OtaException（含服务器 status 原文） */
@@ -267,18 +319,20 @@ object OtaApi {
         // 无更新：把服务器 status 原文带出来，便于用户判断（model not found / no update available）
         val status = json.optString("status")
         AppLogger.w(TAG, "服务器无可下发升级包，status=$status")
-        val hint = when {
-            status.contains("model not found", ignoreCase = true) ->
+        val (kind, hint) = when {
+            status.contains("model not found", ignoreCase = true) -> OtaStatus.MODEL_NOT_FOUND to
                 "服务器机型库中未匹配到该机型（匹配键：model + board + android + chipset，实测结论）\n" +
                     "请保持「自动参数探测」开启后重试；若仍失败，可到「高级参数」手动指定 chipset。"
-            status.contains("no update available", ignoreCase = true) ->
-                "服务器已识别该机型（四元组匹配成功），但按当前 display 版本没有可下发的包。\n" +
-                    "可尝试切换通道，或在「高级参数」里填入其他 display（当前版本号）。"
-            status.contains("no firmware version param", ignoreCase = true) ->
+            status.contains("already latest", ignoreCase = true) -> OtaStatus.ALREADY_LATEST to
+                "服务端已识别本机型，且当前固件版本就是保留记录里的最新版 —— 属于正常结果，无包可下。"
+            status.contains("no update available", ignoreCase = true) -> OtaStatus.NO_UPDATE to
+                "服务端已识别本机型（四元组匹配成功），但机型库里没有以当前 display 版本为基线的包。\n" +
+                    "可用「高级参数」把 display 改成更早的版本号再试，也说明该机型可能从未上传过 OTA 包。"
+            status.contains("no firmware version param", ignoreCase = true) -> OtaStatus.NO_DISPLAY to
                 "服务器缺少 display 参数（当前版本号）。请在「高级参数」里手动填写 display 后重试。"
-            else -> "服务器未返回可用升级包。"
+            else -> OtaStatus.UNKNOWN to "服务器未返回可用升级包。"
         }
-        throw OtaException("$hint\n服务器 status: ${status.ifBlank { raw.take(200) }}")
+        throw OtaStatusException(kind, "$hint\n服务器 status: ${status.ifBlank { raw.take(200) }}")
     }
 
     /** 下载并解析 XML 配置 */

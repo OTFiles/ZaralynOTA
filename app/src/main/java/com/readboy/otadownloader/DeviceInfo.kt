@@ -220,25 +220,25 @@ object DeviceInfoCollector {
             pairs.filter { it.second.isNotBlank() }.forEach { map[it.first] = it.second }
             if (map.isNotEmpty() && list.none { it.second == map }) list.add(label to map)
         }
-        // chipset 维度（最关键）：先试属性原值，再试其它可能存放芯片串的属性
-        add("chipset=ro.build.chipset", "chipset" to info.chipsetRaw)
+        // chipset 维度（最关键）：先试官方属性原值，再试其它白名单硬件属性
+        add("chipset=${info.chipsetRaw}（ro.build.chipset，官方取值）", "chipset" to info.chipsetRaw)
         propChipsetCandidates().forEach { (key, value) ->
-            add("chipset=$key", "chipset" to value)
+            add("chipset=$value（$key）", "chipset" to value)
         }
-        add("chipset=soc_id", "chipset" to info.socId)
-        add("chipset=ro.board.platform", "chipset" to info.boardPlatform)
-        add("chipset=ro.hardware", "chipset" to info.hardware)
+        add("chipset=${info.socId}（/sys/devices/soc0/soc_id）", "chipset" to info.socId)
+        add("chipset=${info.boardPlatform}（ro.board.platform）", "chipset" to info.boardPlatform)
+        add("chipset=${info.hardware}（ro.hardware）", "chipset" to info.hardware)
         add("chipset=空", "chipset" to "")
         // display 维度
-        add("display=ro.fota.version", "display" to info.displayRaw)
-        add("display=Build.DISPLAY", "display" to Build.DISPLAY.orEmpty())
+        add("display=${info.displayRaw}（ro.fota.version）", "display" to info.displayRaw)
+        add("display=${Build.DISPLAY}（Build.DISPLAY）", "display" to Build.DISPLAY.orEmpty())
         add("display=空", "display" to "")
         // hard 维度
         add("hard=空", "hard" to "")
-        add("hard=Build.HARDWARE", "hard" to Build.HARDWARE)
+        add("hard=${Build.HARDWARE}（Build.HARDWARE）", "hard" to Build.HARDWARE)
         // 组合：chipset 原值 + hard/display 空
         add(
-            "chipset=属性值+hard空+display空",
+            "chipset=${info.chipsetRaw}+hard空+display空",
             "chipset" to info.chipsetRaw,
             "hard" to "",
             "display" to ""
@@ -358,22 +358,35 @@ object DeviceInfoCollector {
     }
 
     /** 从属性中派生 chipset 候选（属性名含芯片/厂商关键词且值非空） */
-    fun propChipsetCandidates(limit: Int = 12): List<Pair<String, String>> {
-        val props = allProps()
-        if (props.isEmpty()) return emptyList()
-        val keyword = Regex("chip|soc|vendor|oem|odm|platform|hardware|project", RegexOption.IGNORE_CASE)
-        val skip = setOf(
-            "ro.build.version.hard", "ro.hardware", "ro.product.board", "ro.board.platform",
-            "ro.product.cpu.abi", "ro.product.cpu.abilist", "ro.product.cpu.abilist32", "ro.product.cpu.abilist64"
-        )
-        return props.entries
-            .filter { keyword.containsMatchIn(it.key) && it.value.isNotBlank() && it.key !in skip }
-            .filter { !it.value.equals(UNKNOWN, ignoreCase = true) }
-            .sortedBy { it.key }
-            .map { it.key to it.value }
-            .distinctBy { it.second }
-            .take(limit)
-    }
+    /**
+     * 明确的「芯片/硬件型号」类属性白名单。
+     * ⚠️ 之前用关键词模糊匹配属性名（chip|soc|vendor|hardware…），实测会把
+     * init.svc.vendor-*=stopped、persist.vendor.*=2、ro.hardware.egl=adreno、ro.oem_unlock_supported=true
+     * 这类无关值当成 chipset 候选发给服务器（已在实际日志中复现）——改为白名单取值。
+     */
+    private val CHIPSET_PROP_KEYS = listOf(
+        "ro.build.chipset",
+        "ro.vendor.build.chipset",
+        "ro.system.build.chipset",
+        "ro.product.build.chipset",
+        "ro.odm.build.chipset",
+        "ro.board.platform",
+        "ro.boot.hardware",
+        "ro.hardware.chipname",
+        "ro.chipname",
+        "ro.product.hardware.version",
+        "ro.boot.product.hardware.sku",
+        "ro.hardware"
+    )
+
+    /** 从白名单属性中取非空的 chipset 候选（key -> value） */
+    fun propChipsetCandidates(limit: Int = 8): List<Pair<String, String>> = CHIPSET_PROP_KEYS
+        .mapNotNull { key ->
+            val value = prop(key)
+            if (value.isBlank() || value.equals(UNKNOWN, ignoreCase = true)) null else key to value
+        }
+        .distinctBy { it.second }
+        .take(limit)
 
     /** 与官方一致：属性为空时回退 Build，仍为空则回退 "unknown" */
     private fun propOr(propKey: String, fallback: String): String {
