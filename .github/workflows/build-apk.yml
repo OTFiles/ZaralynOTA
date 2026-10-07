@@ -117,26 +117,32 @@ jobs:
         body: |
           ## Zaralyn OTA 固件下载器
 
-          按当前机型向读书郎 OTA 服务器查询固件包地址，并支持直接下载。
+          按当前机型向读书郎 OTA 服务器查询固件包地址，并支持直接下载（Material Design 3）。
+          **支持 Android 5.0 (API 21) ~ Android 14 (API 34)，含老机型 Android 7 (API 24/25)。**
 
           ### 功能
 
-          - **查询固件地址**：POST `ota.readboy.com/update.php`，支持 JSON / XML 两种响应形态
-          - **完整包模式**：发送无法匹配的指纹，强制服务端回退完整包通道
-          - **通道选择**：正式 / 测试 / 公测
-          - **直接下载**：流式下载 + 实时进度/速度 + MD5 校验
+          - **查询固件地址**：POST `ota.readboy.com/update.php`，兼容 JSON / XML 两种响应形态
+          - **机型匹配**：服务器按 `(model, board, android, chipset)` 四元组精确匹配（`chipset` 取 `ro.build.chipset`）
+          - **自动参数探测**（默认开）：默认参数不匹配时自动尝试多种 chipset/display/hard 取值，命中即用
+          - **高级参数**：可手动覆盖 model/board/android/chipset/display/hard/serial（持久化，可恢复默认）
+          - **通道选择**：正式 / 测试 / 公测（服务器参数 `debug` = 0 / 1 / 2）
+          - **直接下载**：流式下载 + 实时进度/速度 + MD5 校验 + 可取消
+          - **兼容性自检**：系统版本/属性读取/OTA 连通/目录可写/剩余空间/FileProvider，一键复制报告
           - **日志系统**：Logcat / 内存 / 按天滚动文件三路输出，崩溃自动落盘
-          - **错误处理**：网络、解析、下载全链路捕获并可在界面查看堆栈
 
           ### 安装说明
 
-          1. 下载 APK 并安装
-          2. 授予联网权限（首次启动即可）
-          3. 选择通道 → 「查询更新」→ 「下载固件」
+          1. 下载 APK 并安装（Android 5.0+）
+          2. 首次启动无需额外权限（仅联网）
+          3. 选通道 → 「查询更新」→「下载固件」
 
           ### 说明
 
-          - 逆向参考：DreamUpdate (com.dream.ota.update) / 家长管理生态接口文档
+          - 服务器在当前版本号（`display`）基础上按梯度下发**增量包**；伪造 `fingerprint` 不会得到完整包，
+            能否拿到全量包取决于服务端机型库条目
+          - 若提示 `model not found`：先看「兼容性自检」，再用「高级参数」手动填 `chipset`
+          - 逆向参考：DreamUpdate 2.1.0（com.dream.ota.update）
           - 固件保存于应用私有目录 `Android/data/com.readboy.otadownloader/files/Download/`
           - 仅供设备所有者对自己的设备做固件存档使用
         files: ZaralynOTA-v${{ github.run_number }}.apk
