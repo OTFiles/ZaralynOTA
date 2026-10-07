@@ -33,4 +33,11 @@
 
     <color name="md_surface_container">#EAF0E7</color>
     <color name="md_surface_container_high">#E4EAE2</color>
+    <color name="md_surface_container_low">#F7F2FA</color>
+    <color name="md_surface_container_highest">#E6E0E9</color>
+    <color name="md_surface_container_lowest">#FFFFFF</color>
+    <color name="md_surface_dim">#DED8E1</color>
+    <color name="md_surface_bright">#FEF7FF</color>
+    <color name="md_inverse_surface">#313033</color>
+    <color name="md_inverse_on_surface">#F4EFF4</color>
 </resources>
