@@ -129,7 +129,7 @@ object CompatCheck {
         items += Item("文件分享(FileProvider)", providerOk, if (providerOk) "URI 生成正常" else "生成失败（会影响分享日志）")
 
         AppLogger.i(TAG, "兼容性自检：${items.count { it.ok }}/${items.size} 项通过")
-        items.forEach { AppLogger.i(TAG, "  ${if (it.ok) "✓" else "✗"} ${it.name}: ${it.detail}") }
+        items.forEach { AppLogger.i(TAG, "  ${if (it.ok) "[通过]" else "[未通过]"} ${it.name}: ${it.detail}") }
         return items
     }
 
@@ -141,7 +141,7 @@ object CompatCheck {
         append("系统: Android ").append(Build.VERSION.RELEASE).append(" (API ").append(Build.VERSION.SDK_INT).append(')').append('\n')
         append("版本: ").append(BuildConfig.VERSION_NAME).append(" (").append(BuildConfig.VERSION_CODE).append(')').append('\n')
         items.forEach { item ->
-            append(if (item.ok) "✓ " else "✗ ").append(item.name).append(": ").append(item.detail).append('\n')
+            append(if (item.ok) "[通过] " else "[未通过] ").append(item.name).append(": ").append(item.detail).append('\n')
         }
     }.trim()
 }

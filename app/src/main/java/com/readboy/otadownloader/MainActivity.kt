@@ -257,7 +257,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     if (outcome.pkg == null) {
                         val attempts = outcome.attempts.joinToString("\n") {
-                            "  ${it.index}. ${it.label} → ${it.status}"
+                            "  ${it.index}. ${it.label} -> ${it.status}"
                         }
                         throw OtaException(
                             (outcome.errorMessage ?: "全部参数组合均未获取到升级包") +
