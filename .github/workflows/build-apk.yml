@@ -131,6 +131,19 @@ jobs:
           - **兼容性自检**：系统版本/属性读取/OTA 连通/目录可写/剩余空间/FileProvider，一键复制报告
           - **日志系统**：Logcat / 内存 / 按天滚动文件三路输出，崩溃自动落盘
 
+          ### 本版修正（v1.5）
+
+          - **状态语义修正**：只有服务端返回 `model not found` 才继续换 `chipset` 探测；
+            `already latest`（机型匹配成功且已是最新版）/ `no update available`（机型匹配但无该版本基线包）
+            属服务端定论，立即停止探测并作为「结论」展示（不再是错误弹窗，也不再无意义连发请求）
+          - **新增「服务端固件目录探测」**：按 `<model>_<chipset>` 探测 `/ConfigXml/` 目录存在性
+            （403=目录存在 / **404=服务端从未为该机型上传过固件**），结论里一并展示
+          - **chipset 探测候选改为属性白名单**（`ro.build.chipset` / `ro.board.platform` / `ro.boot.hardware` /
+            `ro.product.hardware.version` / `ro.boot.product.hardware.sku` 等）：
+            此前按关键词模糊匹配会把 `init.svc.*`、`persist.*`、`ro.hardware.egl` 之类的值
+            （如 `stopped` / `true` / `adreno` / `2`）当作 chipset 发给服务器
+          - 探测进度与记录改为显示**实际取值**（如 `chipset=RB961P（ro.product.hardware.version）`）
+
           ### 安装说明
 
           1. 下载 APK 并安装（Android 5.0+）
