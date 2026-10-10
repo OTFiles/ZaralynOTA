@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         setupResultCard()
         setupProgressCard()
 
+        syncChannelFromPrefs()
         loadDeviceInfo()
     }
 
@@ -60,6 +61,11 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.action_advanced -> {
                     showAdvancedParams()
+                    true
+                }
+
+                R.id.action_scan -> {
+                    startActivity(Intent(this, ScanActivity::class.java))
                     true
                 }
 
@@ -210,10 +216,15 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun currentChannel(): Int = when (binding.rgChannel.checkedRadioButtonId) {
-        R.id.rbTest -> 1
-        R.id.rbBeta -> 2
-        else -> 0
+    private fun currentChannel(): Int {
+        // 尝试页命中后会把通道写入 prefs；单选按钮有效时以按钮为准
+        val checked = when (binding.rgChannel.checkedRadioButtonId) {
+            R.id.rbTest -> 1
+            R.id.rbBeta -> 2
+            R.id.rbRelease -> 0
+            else -> -1
+        }
+        return if (checked >= 0) checked else prefs().getInt("channel", 0)
     }
 
     private fun fingerprintOverride(): String? {
@@ -306,6 +317,16 @@ class MainActivity : AppCompatActivity() {
                 setQuerying(false)
             }
         }
+    }
+
+    /** 尝试页命中后保存的通道同步到单选按钮 */
+    private fun syncChannelFromPrefs() {
+        runCatching {
+            when (prefs().getInt("channel", 0)) {
+                1 -> binding.rgChannel.check(R.id.rbTest)
+                2 -> binding.rgChannel.check(R.id.rbBeta)
+            }
+        }.onFailure { AppLogger.caught(TAG, "同步通道设置", it) }
     }
 
     // ==================== 高级参数（手动覆盖 / 持久化） ====================

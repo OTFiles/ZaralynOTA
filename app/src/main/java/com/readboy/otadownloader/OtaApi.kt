@@ -2,6 +2,7 @@ package com.readboy.otadownloader
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -120,6 +121,71 @@ object OtaApi {
         val fingerprint = fingerprintOverride?.takeIf { it.isNotBlank() } ?: info.fingerprint
         val params = DeviceInfoCollector.buildParams(context, info, channel, fingerprint, overrides)
         post(params)
+    }
+
+    /**
+     * 参数尝试（扫描）：按 [ScanPlanner.ScanPlan] 的多轴组合逐个请求，命中即停。
+     * 与 queryWithProbe 的区别：这是“用户指定范围”的主动尝试（如版本号按天递减），
+     * 可跨多个参数轴组合；命中或遇到服务端定论（已是最新/无版本基线）时立即停止。
+     *
+     * @param onProgress 每次尝试后的回调（IO 线程）：已完成数 / 总数 / 当前组合描述 / 状态
+     * @return 命中时的结果；未命中时返回带全部尝试记录的 QueryOutcome
+     */
+    suspend fun queryWithScan(
+        context: Context,
+        channel: Int,
+        fingerprintOverride: String?,
+        overrides: Map<String, String> = emptyMap(),
+        plan: ScanPlanner.ScanPlan,
+        onProgress: (done: Int, total: Int, label: String, status: String) -> Unit = { _, _, _, _ -> }
+    ): QueryOutcome = withContext(Dispatchers.IO) {
+        val info = DeviceInfoCollector.collect(context)
+        val fingerprint = fingerprintOverride?.takeIf { it.isNotBlank() } ?: info.fingerprint
+        val base = DeviceInfoCollector.buildParams(context, info, channel, fingerprint, overrides)
+
+        val combinations = plan.combinations
+        val attempts = mutableListOf<QueryAttempt>()
+        var lastError: String? = null
+
+        AppLogger.i(TAG, "开始参数尝试：${ScanPlanner.describe(plan.axes, plan.maxAttempts)}（实际 ${combinations.size} 次）")
+
+        for ((index, extra) in combinations.withIndex()) {
+            val params = LinkedHashMap(base)
+            extra.forEach { (k, v) -> if (k in params) params[k] = v }
+            val label = ScanPlanner.ScanPlan.format(extra)
+            val result = runCatching { post(params) }
+
+            result.onSuccess { pkg ->
+                attempts.add(QueryAttempt(index + 1, label, "命中", true, ""))
+                onProgress(index + 1, combinations.size, label, "命中")
+                AppLogger.i(TAG, "尝试命中（第 ${index + 1}/${combinations.size} 次）：$label")
+                return@withContext QueryOutcome(pkg, attempts, label, params, null)
+            }.onFailure { e ->
+                val msg = e.message.orEmpty()
+                lastError = msg
+                val status = when {
+                    e is OtaStatusException -> when (e.status) {
+                        OtaStatus.MODEL_NOT_FOUND -> "机型不匹配"
+                        OtaStatus.ALREADY_LATEST -> "已是最新版本"
+                        OtaStatus.NO_UPDATE -> "无此版本基线"
+                        OtaStatus.NO_DISPLAY -> "缺 display"
+                        OtaStatus.UNKNOWN -> "无包"
+                    }
+                    msg.contains("model not found", ignoreCase = true) -> "机型不匹配"
+                    else -> "失败"
+                }
+                attempts.add(QueryAttempt(index + 1, label, status, false, ""))
+                onProgress(index + 1, combinations.size, label, status)
+                AppLogger.i(TAG, "尝试 ${index + 1}/${combinations.size} 未命中：$label -> $status")
+                // 服务端已给结论（非机型不匹配）且没有版本轴可变时，继续也没意义 —— 保守起见仍继续，
+                // 但若是“机型不匹配”且本次组合已把 chipset 用完，后续组合仍可能命中，故不提前退出。
+            }
+            if (plan.intervalMs > 0 && index < combinations.size - 1) {
+                delay(plan.intervalMs)
+            }
+        }
+
+        QueryOutcome(null, attempts, null, null, lastError)
     }
 
     /**
